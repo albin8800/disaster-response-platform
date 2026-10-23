@@ -1,0 +1,49 @@
+name: CI - Mapping Service                                                                                                                                           
+                                                                                                                                                                         
+on:                                                                                                                                                                  
+  push:                                                                                                                                                              
+    branches: [ main, develop ]                                                                                                                                      
+    paths:                                                                                                                                                           
+      - 'backend/mapping-service/**'                                                                                                                                 
+      - '.github/workflows/ci-mapping.yml'                                                                                                                           
+  pull_request:                                                                                                                                                      
+    branches: [ main, develop ]                                                                                                                                      
+    paths:                                                                                                                                                           
+      - 'backend/mapping-service/**'                                                                                                                                 
+      - '.github/workflows/ci-mapping.yml'                                                                                                                           
+                                                                                                                                                                     
+jobs:                                                                                                                                                                
+  validate-mapping:                                                                                                                                                  
+    name: Lint, Validate & Smoke Test                                                                                                                                
+    runs-on: ubuntu-latest                                                                                                                                           
+    defaults:                                                                                                                                                        
+      run:                                                                                                                                                           
+        working-directory: backend/mapping-service                                                                                                                   
+                                                                                                                                                                     
+    steps:                                                                                                                                                           
+      # Step 1: Clone repository                                                                                                                                     
+      - name: Checkout Source Code                                                                                                                                   
+        uses: actions/checkout@v4                                                                                                                                    
+                                                                                                                                                                     
+      # Step 2: Provision Python 3.12 with automated pip caching                                                                                                     
+      - name: Set up Python 3.12                                                                                                                                     
+        uses: actions/setup-python@v5                                                                                                                                
+        with:                                                                                                                                                        
+          python-version: '3.12'                                                                                                                                     
+          cache: 'pip'                                                                                                                                               
+          cache-dependency-path: backend/mapping-service/requirements.txt                                                                                            
+                                                                                                                                                                     
+      # Step 3: Upgrade pip and install service dependencies + linter                                                                                                
+      - name: Install Dependencies                                                                                                                                   
+        run: |                                                                                                                                                       
+          python -m pip install --upgrade pip                                                                                                                        
+          pip install -r requirements.txt                                                                                                                            
+          pip install ruff                                                                                                                                           
+                                                                                                                                                                     
+      # Step 4: Run Ruff linter to verify formatting and syntax                                                                                                      
+      - name: Lint Code with Ruff                                                                                                                                    
+        run: ruff check .                                                                                                                                            
+                                                                                                                                                                     
+      # Step 5: Smoke test - verify the FastAPI application imports without errors                                                                                   
+      - name: Smoke Test FastAPI App                                                                                                                                 
+        run: python -c "from app.main import app; print('FastAPI app imported successfully')"        

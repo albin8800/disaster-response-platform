@@ -1,0 +1,20 @@
+# Node / JavaScript
+node_modules/
+dist/
+npm-debug.log*
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Environment variables & secrets
+.env
+.env.local
+
+# Operating System & IDE junk
+.DS_Store
+.vscode/
+*.swp

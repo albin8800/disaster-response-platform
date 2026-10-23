@@ -1,0 +1,57 @@
+services:                                                                                                                                                            
+  # --------------------------------------------------                                                                                                               
+  # Node.js / Express SMS Notification Microservice                                                                                                                  
+  # --------------------------------------------------                                                                                                               
+  sms-service:                                                                                                                                                       
+    build:                                                                                                                                                           
+      context: ./backend/sms-service                                                                                                                                 
+      dockerfile: Dockerfile                                                                                                                                         
+    container_name: disaster_sms_service                                                                                                                             
+    ports:                                                                                                                                                           
+      - "3000:3000"                                                                                                                                                  
+    environment:                                                                                                                                                     
+      - PORT=3000                                                                                                                                                    
+      - NODE_ENV=production                                                                                                                                          
+    networks:                                                                                                                                                        
+      - disaster-net                                                                                                                                                 
+    restart: unless-stopped                                                                                                                                          
+    # Linux cgroups (Resource Management)                                                                                                                            
+    deploy:                                                                                                                                                          
+      resources:                                                                                                                                                     
+        limits:                                                                                                                                                      
+          cpus: "0.50"       # Limit to 50% of a single CPU core                                                                                                     
+          memory: 256M       # Cap max memory at 256 Megabytes                                                                                                       
+        reservations:                                                                                                                                                
+          cpus: "0.10"       # Reserve 10% CPU minimum                                                                                                               
+          memory: 64M        # Guarantee 64MB RAM                                                                                                                    
+                                                                                                                                                                     
+  # --------------------------------------------------                                                                                                               
+  # Python / FastAPI Mapping & Safe-Zone Microservice
+  # --------------------------------------------------
+  mapping-service:
+    build:
+      context: ./backend/mapping-service
+      dockerfile: Dockerfile
+    container_name: disaster_mapping_service
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+    networks:
+      - disaster-net
+    restart: unless-stopped
+    # Linux cgroups (Resource Management)
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+        reservations:
+          cpus: "0.10"
+          memory: 64M
+
+  #Dedicated bridge network for internal inter-service communication
+networks:
+  disaster-net:
+    driver: bridge

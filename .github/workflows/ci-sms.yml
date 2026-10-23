@@ -1,0 +1,46 @@
+name: CI - SMS Service                                                                                                                                               
+                                                                                                                                                                         
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/sms-service/**'
+      - '.github/workflows/ci-sms.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/sms-service/**'
+      - '.github/workflows/ci-sms.yml'                                                                                                                               
+                                                                                                                                                                     
+jobs:                                                                                                                                                                
+  validate-sms:                                                                                                                                                      
+    name: Lint, Typecheck & Build                                                                                                                                    
+    runs-on: ubuntu-latest                                                                                                                                           
+    defaults:                                                                                                                                                        
+      run:                                                                                                                                                           
+        working-directory: backend/sms-service                                                                                                                       
+                                                                                                                                                                     
+    steps:                                                                                                                                                           
+      # Step 1: Clone the repository onto the GitHub runner                                                                                                          
+      - name: Checkout Source Code                                                                                                                                   
+        uses: actions/checkout@v4                                                                                                                                    
+                                                                                                                                                                     
+      # Step 2: Provision Node.js with automated npm caching
+      - name: Set up Node.js 24.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: 'npm'
+          cache-dependency-path: backend/sms-service/package-lock.json                                                                                               
+                                                                                                                                                                     
+      # Step 3: Clean, deterministic dependency installation                                                                                                         
+      - name: Install Dependencies                                                                                                                                   
+        run: npm ci                                                                                                                                                  
+                                                                                                                                                                     
+      # Step 4: Validate TypeScript types without outputting files                                                                                                   
+      - name: Typecheck TypeScript                                                                                                                                   
+        run: npx tsc --noEmit                                                                                                                                        
+                                                                                                                                                                     
+      # Step 5: Test full production compilation to dist/                                                                                                            
+      - name: Build Application                                                                                                                                      
+        run: npm run build     
